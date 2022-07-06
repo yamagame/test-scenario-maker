@@ -19,7 +19,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "vite build",
-    "build:copy": "vite build --base=/git-diff-viewer/ && rm -rf docs && mv -f dist docs",
+    "build:copy": "vite build --base=/test-scenario-maker/ && rm -rf docs && mv -f dist docs",
     "dev": "vite serve",
     "preview": "vite preview",
     "test": "react-scripts test",
