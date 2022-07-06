@@ -62,6 +62,5 @@ export const csvToScenario = (csv: string, pos: string) => {
     }
     return sum;
   }, [] as CSV.Item[][]);
-  console.log(sum);
   return sum;
 };
