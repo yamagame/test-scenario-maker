@@ -1,5 +1,7 @@
 import * as CSV from "utils/csv-parser";
 
+export type ScenarioItem = CSV.Item & { filled?: boolean };
+
 export function copyToClipboard(text: string) {
   navigator.clipboard.writeText(text);
 }
@@ -20,47 +22,127 @@ const alphaToNumber = (str: string) => {
 };
 
 const strToPos = (pos: string) => {
-  const [startLine, screen, step, marker] = pos.split(":").map((v) => v.trim());
-  const ret = {
-    startLine: parseInt(startLine), // 行
-    screen: parseInt(alphaToNumber(screen)), // 列(画面名)
-    step: parseInt(alphaToNumber(step)), // 列(ステップ)
-    marker: parseInt(alphaToNumber(marker)), // 列(選択マーカー)
+  const array = pos
+    .split(":")
+    .map((v) => v.trim())
+    .filter((v) => v !== "");
+  return {
+    startLine: parseInt(array[0]),
+    data: [...array.slice(1).map((v) => parseInt(alphaToNumber(v)))],
+    capital: [...array.slice(1).map((v) => v.match(/^[A-Z]+$/) !== null)],
   };
-  return ret;
 };
 
+const trimSameValue = (src: ScenarioItem[], target: ScenarioItem[]) => {
+  const r: ScenarioItem[] = src.map((s, i) => {
+    if (target[i]) {
+      if (target[i].value === s.value && s.filled) {
+        return { value: "" };
+      }
+    }
+    return s;
+  });
+  return r;
+};
+
+/* ◯のついた項目を抜き出す */
 export const csvToScenario = (csv: string, pos: string) => {
   const csvArray = CSV.parse(csv).map((v) => v);
   const p = strToPos(pos);
-  let prescreen = "";
-  let index = 1;
+  let prestr: ScenarioItem[] = [];
+  const t = new Array(p.data.length).fill(0);
+  const temp = csvArray.map((row, rowInd) => {
+    if (rowInd >= p.startLine) {
+      if (row.length >= p.data.length) {
+        if (rowInd > 0) {
+          p.data.forEach((v, i) => {
+            if (row[v]?.value !== "") {
+              t[i]++;
+            }
+          });
+        }
+      }
+    }
+    return [...t];
+  });
+  let index = 0;
+  let lineCount: number[] = [];
   const sum = csvArray.reduce((sum, row, rowInd) => {
     if (rowInd >= p.startLine) {
-      const screen = row[p.screen]?.value || prescreen;
-      const step = row[p.step]?.value || "";
-      const marker = row[p.marker]?.value || "";
-      if (marker) {
-        if (sum.length > 0) {
-          const last = sum[sum.length - 1];
-          if (last[1].value === screen) {
-            sum.push([{ value: `${index}` }, { value: "" }, { value: step }, { value: marker }]);
-          } else {
-            sum.push([
-              { value: `${index}` },
-              { value: screen },
-              { value: step },
-              { value: marker },
-            ]);
-          }
-        } else {
-          sum.push([{ value: `${index}` }, { value: screen }, { value: step }, { value: marker }]);
+      if (row.length >= p.data.length) {
+        const ret: CSV.Item[] = p.data.map((v) => {
+          return {
+            value: row[v]?.value || prestr[v]?.value || "",
+            filled: row[v]?.value ? false : lineCount[v] === temp[rowInd][v],
+          };
+        });
+        if (row[p.data.length - 1].value) {
+          const v = [{ value: `${index}` }, ...ret];
+          sum.push(v);
+          index++;
+          lineCount = temp[rowInd];
         }
-        index++;
+        prestr = ret;
       }
-      prescreen = screen;
     }
     return sum;
   }, [] as CSV.Item[][]);
   return sum;
+};
+
+/* 穴埋め項目を空欄にする */
+export const scenarioJoin = (scenario: ScenarioItem[][], pos: string) => {
+  const p = strToPos(pos);
+  const sum: ScenarioItem[][] = [];
+  let preline: ScenarioItem[] = [];
+  scenario.forEach((line, i) => {
+    if (i > 0) {
+      if (
+        p.capital.some((v, j) => {
+          if (v) return !scenario[i][j + 1].filled;
+          return false;
+        }) ||
+        p.capital.some((v, j) => {
+          if (v) return scenario[i - 1][j + 1].value !== scenario[i][j + 1].value;
+          return false;
+        })
+      ) {
+        // 異なる項目は表示にする
+        sum.push(line);
+      } else {
+        // 同じ項目は非表示にする
+        const t = [...line];
+        t[0] = { ...line[0], filled: true };
+        sum.push(t);
+      }
+    } else {
+      sum.push(line);
+    }
+  });
+  return sum.map((v, i) => {
+    if (i > 0) {
+      return trimSameValue(v, sum[i - 1]);
+    }
+    return trimSameValue(v, preline);
+  });
+};
+
+export const joinItem = (scenario: CSV.Item[][], pos: string) => {
+  const p = strToPos(pos);
+  const ret: CSV.Item[][] = [];
+  scenario.forEach((line, i) => {
+    if (p.data.some((v, i) => p.capital[i] && line[v + 1].value !== "")) {
+      ret.push(line);
+    } else {
+      const pre = ret[i - 1];
+      line.forEach((v, i) => {
+        pre[i].value = `${pre[i].value}\n${v.value}`;
+      });
+    }
+  });
+  return ret.map((v, i) => {
+    const t = [...v];
+    t[0].value = `${i + 1}`;
+    return t.slice(0, t.length - 1);
+  });
 };
