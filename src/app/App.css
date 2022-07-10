@@ -158,6 +158,9 @@ pre {
   border-top: solid 1px lightgray;
   border-bottom: solid 1px lightgray;
   border-left: solid 1px lightgray;
+  color: white;
+  font-weight: bold;
+  background-color: gray;
 }
 
 .maker-col {

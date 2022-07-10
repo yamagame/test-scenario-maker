@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { copyToClipboard, csvToScenario, scenarioJoin, ScenarioItem, joinItem } from "utils";
+import { copyToClipboard, csvToScenario, scenarioJoin, joinItem, makeHeader } from "utils";
 import * as CSV from "utils/csv-parser";
 
 type Config = {
@@ -26,7 +26,6 @@ const saveConfig = (config: Config) => {
 
 function App() {
   const [csv, setCsv] = React.useState("");
-  const [scenario, setScenario] = React.useState<ScenarioItem[][]>([]);
   const [pos, setPos] = React.useState(initialConfig.pos);
 
   React.useEffect(() => {
@@ -38,11 +37,10 @@ function App() {
     setCsv(value);
   };
 
-  React.useEffect(() => {
-    setScenario(csvToScenario(csv, pos));
-  }, [csv, pos]);
-
-  const result = React.useMemo(() => scenarioJoin(scenario, pos), [scenario, pos]);
+  const result = React.useMemo(
+    () => makeHeader(joinItem(scenarioJoin(csvToScenario(csv, pos), pos), pos)),
+    [csv, pos]
+  );
 
   return (
     <>
@@ -56,7 +54,9 @@ function App() {
         <button
           className="maker-button"
           onClick={() => {
-            copyToClipboard(CSV.stringify(joinItem(scenarioJoin(scenario, pos), pos)));
+            copyToClipboard(
+              CSV.stringify(joinItem(scenarioJoin(csvToScenario(csv, pos), pos), pos))
+            );
           }}>
           Copy to Clipboard
         </button>
