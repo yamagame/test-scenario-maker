@@ -8,7 +8,7 @@ type Config = {
 };
 
 const initialConfig: Config = {
-  pos: "0:A:B:C",
+  pos: "0:A:B:c:d",
 };
 
 const configKey = "test-scenario-maker-config";
@@ -57,16 +57,14 @@ function App() {
           className="maker-button"
           onClick={() => {
             copyToClipboard(CSV.stringify(joinItem(scenarioJoin(scenario, pos), pos)));
-          }}
-        >
+          }}>
           Copy to Clipboard
         </button>
         <button
           className="maker-margin-button"
           onClick={() => {
             setCsv("");
-          }}
-        >
+          }}>
           Clear
         </button>
         <div className="maker-text-input">
