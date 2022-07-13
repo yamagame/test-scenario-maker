@@ -27,7 +27,8 @@ const strToPos = (pos: string) => {
     .map((v) => v.trim())
     .filter((v) => v !== "");
   return {
-    startLine: parseInt(array[0]),
+    startLine: 0,
+    starIndex: parseInt(array[0]),
     data: [...array.slice(1).map((v) => parseInt(alphaToNumber(v)))],
     capital: [...array.slice(1).map((v) => v.match(/^[A-Z]+$/) !== null)],
   };
@@ -45,7 +46,7 @@ const trimSameValue = (src: ScenarioItem[], target: ScenarioItem[]) => {
   return r;
 };
 
-/* ◯のついた項目を抜き出す */
+/* マークのある(空文字でない)項目を抜き出す */
 export const csvToScenario = (csv: string, pos: string) => {
   try {
     const csvArray = CSV.parse(csv).map((v) => v);
@@ -77,8 +78,9 @@ export const csvToScenario = (csv: string, pos: string) => {
               filled: row[v]?.value ? false : lineCount[v] === temp[rowInd][v],
             };
           });
+          // マークがある項目
           if (row[p.data.length - 1].value) {
-            const v = [{ value: `${index}` }, ...ret];
+            const v = [{ value: `${index}`, mark: row[p.data.length - 1].value }, ...ret];
             sum.push(v);
             index++;
             lineCount = temp[rowInd];
@@ -140,7 +142,7 @@ export const scenarioJoin = (scenario: ScenarioItem[][], pos: string) => {
 export const joinItem = (scenario: CSV.Item[][], pos: string) => {
   try {
     const p = strToPos(pos);
-    const ret: CSV.Item[][] = [];
+    const ret: (CSV.Item & { mark?: string })[][] = [];
     scenario.forEach((line, i) => {
       if (p.data.some((v, i) => p.capital[i] && line[v + 1].value !== "")) {
         ret.push(line);
@@ -153,8 +155,16 @@ export const joinItem = (scenario: CSV.Item[][], pos: string) => {
     });
     return ret.map((v, i) => {
       const t = [...v];
-      t[0].value = `${i + 1}`;
-      return t.slice(0, t.length - 1);
+      const idx = i + 1 - p.starIndex;
+      if (idx <= 0) {
+        t[0].value = ``;
+      } else {
+        t[0].value = `${idx}`;
+      }
+      return t.slice(0, t.length - 1).map((v) => {
+        const value = t[0].mark ? v.value.replace(/({{.+}})/, t[0].mark) : v.value;
+        return { ...v, value };
+      });
     });
   } catch (err) {
     console.error(err);
@@ -163,5 +173,5 @@ export const joinItem = (scenario: CSV.Item[][], pos: string) => {
 };
 
 export const makeHeader = (scenario: CSV.Item[][]) => {
-  return [["", "大項目", "中項目", "小項目"].map((value) => ({ value })), ...scenario];
+  return [...scenario];
 };

@@ -7,8 +7,10 @@ type Config = {
   pos: string;
 };
 
+const defaultPos = "1:A:B:C:d:e";
+
 const initialConfig: Config = {
-  pos: "0:A:B:c:d",
+  pos: defaultPos,
 };
 
 const configKey = "test-scenario-maker-config";
@@ -69,7 +71,7 @@ function App() {
         </button>
         <div className="maker-text-input">
           <input
-            placeholder="0:A:B:C"
+            placeholder={defaultPos}
             type="text"
             value={pos}
             onChange={(e) => {
