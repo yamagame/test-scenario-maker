@@ -107,7 +107,9 @@ function App() {
             <div key={`${i}`} className={i > 0 ? "maker-col" : "maker-col-first"}>
               {line.map((v, j) => {
                 return (
-                  <div key={`${i}-${j}`} className={j === 0 ? "maker-index" : "maker-cell"}>
+                  <div
+                    key={`${i}-${j}`}
+                    className={j === 0 ? "maker-index" : j === 2 ? "maker-cell-1" : "maker-cell-2"}>
                     <pre key={`${i}-${j}`}>
                       <code>{v.value}</code>
                     </pre>

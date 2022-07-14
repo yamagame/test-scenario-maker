@@ -145,8 +145,15 @@ pre {
   padding: 3px;
 }
 
-.maker-cell {
+.maker-cell-1 {
   flex: 1;
+  display: inline-block;
+  border-right: solid 1px lightgray;
+  padding: 3px;
+}
+
+.maker-cell-2 {
+  flex: 2;
   display: inline-block;
   border-right: solid 1px lightgray;
   padding: 3px;
