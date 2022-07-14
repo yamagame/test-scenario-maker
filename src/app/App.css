@@ -143,20 +143,26 @@ pre {
   display: inline-block;
   border-right: solid 1px lightgray;
   padding: 3px;
+  overflow: hidden;
+}
+
+.maker-cell {
+  display: inline-block;
+  border-right: solid 1px lightgray;
+  padding: 3px;
+  overflow: hidden;
 }
 
 .maker-cell-1 {
   flex: 1;
-  display: inline-block;
-  border-right: solid 1px lightgray;
-  padding: 3px;
 }
 
 .maker-cell-2 {
   flex: 2;
-  display: inline-block;
-  border-right: solid 1px lightgray;
-  padding: 3px;
+}
+
+.maker-cell-3 {
+  flex: 3;
 }
 
 .maker-col-first {

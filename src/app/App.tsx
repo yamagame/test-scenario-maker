@@ -109,7 +109,10 @@ function App() {
                 return (
                   <div
                     key={`${i}-${j}`}
-                    className={j === 0 ? "maker-index" : j === 2 ? "maker-cell-1" : "maker-cell-2"}>
+                    className={[
+                      j === 0 ? "maker-index" : "maker-cell",
+                      j > 2 ? "maker-cell-3" : ["", "maker-cell-2", "maker-cell-1"][j],
+                    ].join(" ")}>
                     <pre key={`${i}-${j}`}>
                       <code>{v.value}</code>
                     </pre>
