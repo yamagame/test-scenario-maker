@@ -145,7 +145,13 @@ export const joinItem = (scenario: CSV.Item[][], pos: string) => {
     const ret: (CSV.Item & { mark?: string })[][] = [];
     scenario.forEach((line, i) => {
       if (p.data.some((v, i) => p.capital[i] && line[v + 1].value !== "")) {
-        ret.push(line);
+        const m = line[0] as CSV.Item & { mark?: string };
+        ret.push(
+          line.map((v) => {
+            const value = m.mark ? v.value.replace(/({{.+}})/, m.mark) : v.value;
+            return { ...v, value };
+          })
+        );
       } else {
         const pre = ret[ret.length - 1];
         const m = line[0] as CSV.Item & { mark?: string };
