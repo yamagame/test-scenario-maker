@@ -148,8 +148,10 @@ export const joinItem = (scenario: CSV.Item[][], pos: string) => {
         ret.push(line);
       } else {
         const pre = ret[ret.length - 1];
+        const m = line[0] as CSV.Item & { mark?: string };
         line.forEach((v, i) => {
-          pre[i].value = `${pre[i].value}\n${v.value}`;
+          const value = m.mark ? v.value.replace(/({{.+}})/, m.mark) : v.value;
+          pre[i].value = `${pre[i].value}\n${value}`;
         });
       }
     });
@@ -162,7 +164,10 @@ export const joinItem = (scenario: CSV.Item[][], pos: string) => {
         t[0].value = `${idx}`;
       }
       return t.slice(0, t.length - 1).map((v) => {
-        const value = t[0].mark ? v.value.replace(/({{.+}})/, t[0].mark) : v.value;
+        const value = v.value
+          .split("\n")
+          .filter((v) => v !== "")
+          .join("\n");
         return { ...v, value };
       });
     });
