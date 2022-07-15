@@ -1,6 +1,13 @@
 import React from "react";
 import "./App.css";
-import { copyToClipboard, csvToScenario, scenarioJoin, joinItem, makeHeader } from "utils";
+import {
+  copyToClipboard,
+  csvToScenario,
+  scenarioJoin,
+  joinItem,
+  makeHeader,
+  getScenarioTitle,
+} from "utils";
 import * as CSV from "utils/csv-parser";
 
 type Config = {
@@ -29,6 +36,7 @@ const saveConfig = (config: Config) => {
 function App() {
   const [csv, setCsv] = React.useState("");
   const [pos, setPos] = React.useState(initialConfig.pos);
+  const [title, setTitle] = React.useState("");
 
   React.useEffect(() => {
     const config = loadConfig();
@@ -38,6 +46,10 @@ function App() {
   const onUpdateCsv = (value: string) => {
     setCsv(value);
   };
+
+  React.useEffect(() => {
+    setTitle(getScenarioTitle(csv, pos));
+  }, [csv, pos]);
 
   const result = React.useMemo(
     () => makeHeader(joinItem(scenarioJoin(csvToScenario(csv, pos), pos), pos)),
@@ -57,7 +69,7 @@ function App() {
           className="maker-button"
           onClick={() => {
             copyToClipboard(
-              CSV.stringify(joinItem(scenarioJoin(csvToScenario(csv, pos), pos), pos))
+              CSV.stringify(joinItem(scenarioJoin(csvToScenario(csv, pos), pos), pos, title))
             );
           }}>
           Copy to Clipboard
@@ -102,6 +114,7 @@ function App() {
         })}
       </div> */}
       <div className="maker-container">
+        <div>{title}</div>
         {result.map((line, i) => {
           return (
             <div key={`${i}`} className={i > 0 ? "maker-col" : "maker-col-first"}>

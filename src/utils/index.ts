@@ -46,6 +46,18 @@ const trimSameValue = (src: ScenarioItem[], target: ScenarioItem[]) => {
   return r;
 };
 
+/* マーク列のタイトルを取り出す */
+export const getScenarioTitle = (csv: string, pos: string) => {
+  try {
+    const csvArray = CSV.parse(csv).map((v) => v);
+    const p = strToPos(pos);
+    return csvArray[0][p.data.length - 1].value;
+  } catch (err) {
+    console.error(err);
+    return "";
+  }
+};
+
 /* マークのある(空文字でない)項目を抜き出す */
 export const csvToScenario = (csv: string, pos: string) => {
   try {
@@ -139,7 +151,7 @@ export const scenarioJoin = (scenario: ScenarioItem[][], pos: string) => {
   }
 };
 
-export const joinItem = (scenario: CSV.Item[][], pos: string) => {
+export const joinItem = (scenario: CSV.Item[][], pos: string, title = "") => {
   try {
     const p = strToPos(pos);
     const ret: (CSV.Item & { mark?: string })[][] = [];
@@ -169,7 +181,8 @@ export const joinItem = (scenario: CSV.Item[][], pos: string) => {
       } else {
         t[0].value = `${idx}`;
       }
-      return t.slice(0, t.length - 1).map((v) => {
+      return t.slice(0, t.length - 1).map((v, j) => {
+        if (i === 0 && j === 0) return { ...v, value: title };
         const value = v.value
           .split("\n")
           .filter((v) => v !== "")
