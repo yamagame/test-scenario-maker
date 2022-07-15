@@ -14,7 +14,7 @@ type Config = {
   pos: string;
 };
 
-const defaultPos = "1:A:B:C:d:e";
+const defaultPos = "1:A:B:c:d:e";
 
 const initialConfig: Config = {
   pos: defaultPos,
